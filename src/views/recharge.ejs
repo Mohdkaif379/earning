@@ -94,9 +94,27 @@
       <form id="rechargeForm" action="/recharge" method="POST" class="mt-4">
         <input type="hidden" id="selectedAmountInput" name="amount" />
         <input type="hidden" id="selectedMethodInput" name="paymentMethod" />
-        <button id="confirmRechargeBtn" type="submit" class="w-full px-4 py-2 rounded-lg bg-amber-700 text-[#fdf0d5] hover:bg-amber-800 disabled:opacity-60 disabled:cursor-not-allowed" disabled>
+        <input type="hidden" id="utrInputHidden" name="utr" />
+        <button id="confirmRechargeBtn" type="button" class="w-full px-4 py-2 rounded-lg bg-amber-700 text-[#fdf0d5] hover:bg-amber-800 disabled:opacity-60 disabled:cursor-not-allowed" disabled>
           Proceed to Pay
         </button>
+        <div id="utrFormSection" class="hidden mt-3 space-y-2">
+          <label for="utrVisibleInput" class="block text-sm font-medium text-amber-900">Enter UTR Number</label>
+          <input
+            id="utrVisibleInput"
+            type="text"
+            class="w-full border border-amber-300 rounded-lg px-3 py-2 text-amber-950 bg-[#fff8ea] placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+            placeholder="UTR Number"
+          />
+          <div class="flex gap-2">
+            <button id="submitUtrBtn" type="button" class="flex-1 px-4 py-2 rounded-lg bg-amber-700 text-[#fdf0d5] hover:bg-amber-800">
+              Submit UTR
+            </button>
+            <button id="cancelUtrBtn" type="button" class="px-4 py-2 rounded-lg border border-amber-300 text-amber-900 hover:bg-amber-100">
+              Cancel
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   </div>
@@ -117,6 +135,11 @@
       const selectedMethodText = document.getElementById('selectedMethodText');
       const selectedAmountInput = document.getElementById('selectedAmountInput');
       const selectedMethodInput = document.getElementById('selectedMethodInput');
+      const utrInputHidden = document.getElementById('utrInputHidden');
+      const utrFormSection = document.getElementById('utrFormSection');
+      const utrVisibleInput = document.getElementById('utrVisibleInput');
+      const submitUtrBtn = document.getElementById('submitUtrBtn');
+      const cancelUtrBtn = document.getElementById('cancelUtrBtn');
       const downloadQrBtn = document.getElementById('downloadQrBtn');
       const confirmRechargeBtn = document.getElementById('confirmRechargeBtn');
       const rechargeForm = document.getElementById('rechargeForm');
@@ -143,6 +166,9 @@
         if (qrModal) qrModal.classList.add('hidden');
         if (paymentCountdown) paymentCountdown.classList.add('hidden');
         if (confirmRechargeBtn) confirmRechargeBtn.disabled = true;
+        if (utrFormSection) utrFormSection.classList.add('hidden');
+        if (utrVisibleInput) utrVisibleInput.value = '';
+        if (utrInputHidden) utrInputHidden.value = '';
         stopCountdown();
       }
 
@@ -168,6 +194,9 @@
           if (qrModal) qrModal.classList.add('hidden');
           if (confirmRechargeBtn) confirmRechargeBtn.disabled = true;
           if (paymentCountdown) paymentCountdown.classList.add('hidden');
+          if (utrFormSection) utrFormSection.classList.add('hidden');
+          if (utrVisibleInput) utrVisibleInput.value = '';
+          if (utrInputHidden) utrInputHidden.value = '';
           stopCountdown();
           return;
         }
@@ -181,6 +210,9 @@
         selectedMethodText.textContent = selectedMethod;
         if (selectedAmountInput) selectedAmountInput.value = selectedAmount;
         if (selectedMethodInput) selectedMethodInput.value = selectedMethod;
+        if (utrFormSection) utrFormSection.classList.add('hidden');
+        if (utrVisibleInput) utrVisibleInput.value = '';
+        if (utrInputHidden) utrInputHidden.value = '';
         if (confirmRechargeBtn) confirmRechargeBtn.disabled = false;
         if (qrModal) qrModal.classList.remove('hidden');
         startCountdown();
@@ -209,6 +241,34 @@
           if (!selectedAmount || !selectedMethod || Date.now() > countdownEndsAt) {
             e.preventDefault();
           }
+        });
+      }
+
+      if (confirmRechargeBtn && rechargeForm) {
+        confirmRechargeBtn.addEventListener('click', function () {
+          if (!selectedAmount || !selectedMethod || Date.now() > countdownEndsAt) {
+            return;
+          }
+          if (utrFormSection) utrFormSection.classList.remove('hidden');
+          if (utrVisibleInput) utrVisibleInput.focus();
+        });
+      }
+
+      if (submitUtrBtn && rechargeForm) {
+        submitUtrBtn.addEventListener('click', function () {
+          if (!selectedAmount || !selectedMethod || Date.now() > countdownEndsAt) return;
+          const enteredUtr = utrVisibleInput ? String(utrVisibleInput.value || '').trim() : '';
+          if (!enteredUtr) return;
+          if (utrInputHidden) utrInputHidden.value = enteredUtr;
+          rechargeForm.submit();
+        });
+      }
+
+      if (cancelUtrBtn) {
+        cancelUtrBtn.addEventListener('click', function () {
+          if (utrFormSection) utrFormSection.classList.add('hidden');
+          if (utrVisibleInput) utrVisibleInput.value = '';
+          if (utrInputHidden) utrInputHidden.value = '';
         });
       }
 
