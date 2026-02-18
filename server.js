@@ -3,7 +3,7 @@ const createUsersTable = require("./src/config/initDb");
 
 const PORT = 3000;
 
-// Initialize database tables
+
 createUsersTable();
 
 app.listen(PORT, () => {
