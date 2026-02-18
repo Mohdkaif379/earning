@@ -18,7 +18,7 @@
 
     <p class="text-amber-800 mb-2">Hello <span class="font-semibold text-amber-950"><%= name %></span>,</p>
     <p class="text-amber-800 mb-5">
-      A recharge is required before your next withdrawal. Select an amount and payment method.
+      New users must complete recharge before withdrawal. Select an amount and payment method.
     </p>
 
     <% if (rechargeError) { %>
@@ -41,7 +41,8 @@
       <p class="text-3xl font-bold text-amber-950 mt-1">Rs <%= wallet %></p>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="amountGrid">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6" id="amountGrid">
+      <button type="button" data-amount="50" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 50</button>
       <button type="button" data-amount="100" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 100</button>
       <button type="button" data-amount="200" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 200</button>
       <button type="button" data-amount="500" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 500</button>

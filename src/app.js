@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const app = express();
 const RECHARGE_WITHDRAW_WAIT_MS = 60 * 60 * 1000;
 const RECHARGE_WALLET_CREDIT_DELAY_MINUTES = 2;
-const ALLOWED_RECHARGE_AMOUNTS = [100, 200, 500, 1000];
+const ALLOWED_RECHARGE_AMOUNTS = [50, 100, 200, 500, 1000];
 const ALLOWED_PAYMENT_METHODS = ["UPI", "PhonePe", "Paytm", "GooglePay"];
 
 const getRechargeScannerImage = (req) => {
@@ -74,15 +74,6 @@ const requireMemberAuth = (req, res, next) => {
 };
 
 const getWithdrawEligibility = async (userId) => {
-  const [lastWithdrawRows] = await db.execute(
-    "SELECT id, created_at FROM withdraw_requests WHERE user_id = ? ORDER BY id DESC LIMIT 1",
-    [userId]
-  );
-
-  if (!lastWithdrawRows.length) {
-    return { allowed: true };
-  }
-
   const [rechargeRows] = await db.execute(
     `SELECT id, amount, created_at
      FROM recharges
@@ -97,6 +88,19 @@ const getWithdrawEligibility = async (userId) => {
   }
 
   const lastRechargeAt = new Date(rechargeRows[0].created_at);
+  const [lastWithdrawRows] = await db.execute(
+    "SELECT id, created_at FROM withdraw_requests WHERE user_id = ? ORDER BY id DESC LIMIT 1",
+    [userId]
+  );
+
+  if (!lastWithdrawRows.length) {
+    const unlockAt = new Date(lastRechargeAt.getTime() + RECHARGE_WITHDRAW_WAIT_MS);
+    if (Date.now() < unlockAt.getTime()) {
+      return { allowed: false, reason: "wait", unlockAt };
+    }
+    return { allowed: true };
+  }
+
   const [withdrawAfterRechargeRows] = await db.execute(
     `SELECT id
      FROM withdraw_requests
