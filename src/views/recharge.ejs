@@ -79,6 +79,14 @@
         Amount: <span id="selectedAmountText"></span> | Method: <span id="selectedMethodText"></span>
       </p>
       <img id="qrImage" src="" alt="Payment QR" class="w-44 h-44 sm:w-56 sm:h-56 border border-amber-300 bg-[#fff8ea] rounded-lg p-2 mx-auto" />
+      <a
+        id="downloadQrBtn"
+        href="#"
+        download="scanner.png"
+        class="mt-3 inline-flex w-full justify-center items-center gap-2 px-4 py-2 rounded-lg border border-amber-300 text-amber-900 hover:bg-amber-100"
+      >
+        <i class="fas fa-download"></i> Download Scanner
+      </a>
       <p id="paymentCountdown" class="mt-3 text-sm text-amber-800 hidden text-center">
         Time left: <span id="paymentCountdownValue" class="font-semibold text-amber-950">05:00</span>
       </p>
@@ -110,6 +118,7 @@
       const selectedMethodText = document.getElementById('selectedMethodText');
       const selectedAmountInput = document.getElementById('selectedAmountInput');
       const selectedMethodInput = document.getElementById('selectedMethodInput');
+      const downloadQrBtn = document.getElementById('downloadQrBtn');
       const confirmRechargeBtn = document.getElementById('confirmRechargeBtn');
       const rechargeForm = document.getElementById('rechargeForm');
       const paymentCountdown = document.getElementById('paymentCountdown');
@@ -166,7 +175,9 @@
 
         const payload = `Recharge ${selectedAmount} via ${selectedMethod}`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(payload)}`;
-        qrImage.src = providedScannerImage || qrUrl;
+        const activeQrSrc = providedScannerImage || qrUrl;
+        qrImage.src = activeQrSrc;
+        if (downloadQrBtn) downloadQrBtn.href = activeQrSrc;
         selectedAmountText.textContent = `Rs ${selectedAmount}`;
         selectedMethodText.textContent = selectedMethod;
         if (selectedAmountInput) selectedAmountInput.value = selectedAmount;
