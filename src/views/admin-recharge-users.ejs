@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recharge Users</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="min-h-screen bg-[#fdf0d5] p-3 sm:p-4">
+  <div class="w-full max-w-7xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-amber-950">Recharge Users</h1>
+        <p class="text-sm text-amber-700">Admin: <%= username %></p>
+      </div>
+      <a href="/admin-dashboard" class="w-full sm:w-auto text-center bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-sm px-4 py-2 rounded-full">
+        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+      </a>
+    </div>
+
+    <% if (rechargeUsersError) { %>
+      <div class="mb-4 text-sm text-red-700 bg-red-100 border border-red-300 rounded-lg px-3 py-2"><%= rechargeUsersError %></div>
+    <% } %>
+    <% if (rechargeUsersSuccess) { %>
+      <div class="mb-4 text-sm text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-lg px-3 py-2"><%= rechargeUsersSuccess %></div>
+    <% } %>
+
+    <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-1 overflow-x-auto">
+      <table class="min-w-[1380px] w-full text-sm">
+        <thead class="text-amber-700 border-b border-amber-300">
+          <tr>
+            <th class="text-left px-4 py-3 font-medium">User ID</th>
+            <th class="text-left px-4 py-3 font-medium">Name</th>
+            <th class="text-left px-4 py-3 font-medium">Email</th>
+            <th class="text-left px-4 py-3 font-medium">Phone</th>
+            <th class="text-left px-4 py-3 font-medium">Status</th>
+            <th class="text-left px-4 py-3 font-medium">Wallet</th>
+            <th class="text-left px-4 py-3 font-medium">Total Recharges</th>
+            <th class="text-left px-4 py-3 font-medium">Total Recharged</th>
+            <th class="text-left px-4 py-3 font-medium">Last Amount</th>
+            <th class="text-left px-4 py-3 font-medium">Last Method</th>
+            <th class="text-left px-4 py-3 font-medium">Last Recharge Status</th>
+            <th class="text-left px-4 py-3 font-medium">Last Recharge At</th>
+            <th class="text-left px-4 py-3 font-medium">Pending Count</th>
+            <th class="text-left px-4 py-3 font-medium">Pending Amount</th>
+            <th class="text-left px-4 py-3 font-medium">Action</th>
+            <th class="text-left px-4 py-3 font-medium">Joined</th>
+          </tr>
+        </thead>
+        <tbody class="text-amber-900">
+          <% if (rechargeUsers && rechargeUsers.length) { %>
+            <% rechargeUsers.forEach(function(user) { %>
+              <tr class="border-b border-amber-300 hover:bg-amber-100">
+                <td class="px-4 py-3"><%= user.id %></td>
+                <td class="px-4 py-3 font-medium"><%= user.name %></td>
+                <td class="px-4 py-3 break-all"><%= user.email %></td>
+                <td class="px-4 py-3"><%= user.phone %></td>
+                <td class="px-4 py-3"><%= user.status %></td>
+                <td class="px-4 py-3">Rs <%= Number(user.wallet_amount || 0).toLocaleString() %></td>
+                <td class="px-4 py-3"><%= Number(user.total_recharges || 0) %></td>
+                <td class="px-4 py-3">Rs <%= Number(user.total_recharged || 0).toLocaleString() %></td>
+                <td class="px-4 py-3">Rs <%= Number(user.last_recharge_amount || 0).toLocaleString() %></td>
+                <td class="px-4 py-3"><%= user.last_payment_method || "-" %></td>
+                <td class="px-4 py-3"><%= user.last_recharge_status || "-" %></td>
+                <td class="px-4 py-3 text-xs"><%= user.last_recharge_at ? new Date(user.last_recharge_at).toLocaleString() : "-" %></td>
+                <td class="px-4 py-3"><%= Number(user.pending_recharges || 0) %></td>
+                <td class="px-4 py-3">Rs <%= Number(user.pending_amount || 0).toLocaleString() %></td>
+                <td class="px-4 py-3">
+                  <% if (Number(user.pending_recharges || 0) > 0) { %>
+                    <form action="/admin/recharge-users/<%= user.id %>/update-pending-status" method="POST" class="flex items-center gap-2" onsubmit="return confirm('Update pending recharge status for this user?')">
+                      <select name="status" class="bg-[#fdf0d5] border border-amber-300 rounded-lg px-2 py-1.5 text-xs text-amber-950 outline-none">
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                      </select>
+                      <button type="submit" class="bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-xs px-3 py-1.5 rounded-full">
+                        Update
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <span class="text-xs text-amber-700">No pending</span>
+                  <% } %>
+                </td>
+                <td class="px-4 py-3 text-xs"><%= user.created_at ? new Date(user.created_at).toLocaleString() : "-" %></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="16" class="px-4 py-5 text-center text-amber-700">No recharge users found.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

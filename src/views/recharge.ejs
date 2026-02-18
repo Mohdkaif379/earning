@@ -106,7 +106,6 @@
       let selectedAmount = null;
       let selectedMethod = null;
       const providedScannerImage = <%- JSON.stringify(scannerImage || "") %>;
-      const paymentGatewayUrl = <%- JSON.stringify(paymentGatewayUrl || "") %>;
 
       const amountButtons = document.querySelectorAll('.recharge-amount');
       const methodButtons = document.querySelectorAll('.payment-method');
@@ -209,16 +208,6 @@
         rechargeForm.addEventListener('submit', function (e) {
           if (!selectedAmount || !selectedMethod || Date.now() > countdownEndsAt) {
             e.preventDefault();
-            return;
-          }
-
-          if (paymentGatewayUrl) {
-            e.preventDefault();
-            const gatewayParams = new URLSearchParams({
-              amount: String(selectedAmount),
-              method: String(selectedMethod)
-            });
-            window.location.href = `${paymentGatewayUrl}${paymentGatewayUrl.includes('?') ? '&' : '?'}${gatewayParams.toString()}`;
           }
         });
       }

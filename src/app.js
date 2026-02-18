@@ -558,6 +558,132 @@ app.post("/admin/users/:id/delete", requireAdminAuth, async (req, res) => {
   }
 });
 
+// Admin: users who made recharge
+app.get("/admin/recharge-users", requireAdminAuth, async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT
+        u.id,
+        u.name,
+        u.email,
+        u.phone,
+        u.status,
+        u.created_at,
+        COALESCE(w.amount, 0) AS wallet_amount,
+        agg.total_recharges,
+        agg.total_recharged,
+        agg.pending_recharges,
+        agg.pending_amount,
+        latest.last_recharge_amount,
+        latest.last_payment_method,
+        latest.last_recharge_status,
+        latest.last_recharge_at
+      FROM users u
+      JOIN (
+        SELECT
+          user_id,
+          COUNT(*) AS total_recharges,
+          COALESCE(SUM(amount), 0) AS total_recharged,
+          COALESCE(SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END), 0) AS pending_recharges,
+          COALESCE(SUM(CASE WHEN LOWER(status) = 'pending' THEN amount ELSE 0 END), 0) AS pending_amount
+        FROM recharges
+        GROUP BY user_id
+      ) agg ON agg.user_id = u.id
+      LEFT JOIN wallets w ON w.user_id = u.id
+      LEFT JOIN (
+        SELECT
+          r1.user_id,
+          r1.amount AS last_recharge_amount,
+          r1.payment_method AS last_payment_method,
+          r1.status AS last_recharge_status,
+          r1.created_at AS last_recharge_at
+        FROM recharges r1
+        JOIN (
+          SELECT user_id, MAX(id) AS max_id
+          FROM recharges
+          GROUP BY user_id
+        ) x ON x.max_id = r1.id
+      ) latest ON latest.user_id = u.id
+      ORDER BY latest.last_recharge_at DESC, u.id DESC`
+    );
+
+    return res.render("admin-recharge-users", {
+      username: req.session.admin.username,
+      rechargeUsers: rows,
+      rechargeUsersError: req.query.rechargeUsersError || null,
+      rechargeUsersSuccess: req.query.rechargeUsersSuccess || null
+    });
+  } catch (error) {
+    console.error("Error fetching recharge users:", error.message);
+    return res.render("admin-recharge-users", {
+      username: req.session.admin.username,
+      rechargeUsers: [],
+      rechargeUsersError: "Failed to fetch recharge users.",
+      rechargeUsersSuccess: null
+    });
+  }
+});
+
+// Admin: update pending recharges status for a user
+app.post("/admin/recharge-users/:userId/update-pending-status", requireAdminAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  const nextStatus = String(req.body.status || "").toLowerCase();
+  if (!userId) {
+    return res.redirect("/admin/recharge-users?rechargeUsersError=Invalid+user");
+  }
+  if (!["completed", "failed"].includes(nextStatus)) {
+    return res.redirect("/admin/recharge-users?rechargeUsersError=Invalid+status");
+  }
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [pendingRows] = await connection.execute(
+      `SELECT id, amount
+       FROM recharges
+       WHERE user_id = ? AND LOWER(status) = 'pending'
+       FOR UPDATE`,
+      [userId]
+    );
+
+    if (!pendingRows.length) {
+      await connection.rollback();
+      return res.redirect("/admin/recharge-users?rechargeUsersError=No+pending+recharge+found+for+this+user");
+    }
+
+    const totalAmount = pendingRows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+    const rechargeIds = pendingRows.map((row) => row.id);
+    const placeholders = rechargeIds.map(() => "?").join(",");
+
+    await connection.execute(
+      `UPDATE recharges SET status = ? WHERE id IN (${placeholders})`,
+      [nextStatus, ...rechargeIds]
+    );
+
+    if (nextStatus === "completed") {
+      await connection.execute(
+        "INSERT INTO wallets (user_id, amount) VALUES (?, ?) ON DUPLICATE KEY UPDATE amount = amount + VALUES(amount)",
+        [userId, totalAmount]
+      );
+    }
+
+    await connection.commit();
+
+    if (nextStatus === "completed") {
+      return res.redirect(`/admin/recharge-users?rechargeUsersSuccess=Completed+and+credited+Rs+${encodeURIComponent(totalAmount.toLocaleString())}`);
+    }
+
+    return res.redirect(`/admin/recharge-users?rechargeUsersSuccess=Pending+recharges+marked+as+failed`);
+  } catch (error) {
+    await connection.rollback();
+    console.error("Error updating pending recharge status:", error.message);
+    return res.redirect("/admin/recharge-users?rechargeUsersError=Failed+to+update+recharge+status");
+  } finally {
+    connection.release();
+  }
+});
+
 // Member dashboard
 app.get("/dashboard", requireMemberAuth, async (req, res) => {
   try {
