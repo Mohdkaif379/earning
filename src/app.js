@@ -348,7 +348,7 @@ app.post("/member/login", async (req, res) => {
     }
 
     if ((member.status || "").toLowerCase() === "block") {
-      return res.render("login", { memberError: "Your account is blocked. Contact admin." });
+      return res.render("login", { memberError: "Your account has been blocked." });
     }
 
     await db.execute(
