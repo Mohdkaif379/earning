@@ -8,13 +8,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body class="min-h-screen bg-[#fdf0d5]">
-  <div class="max-w-4xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-6">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
       <div>
         <h1 class="text-2xl font-semibold text-amber-950">Withdrawal Request Detail</h1>
         <p class="text-amber-700 text-sm">Admin: <%= username %></p>
       </div>
-      <a href="/admin-dashboard" class="bg-amber-700 text-[#fdf0d5] border border-amber-700 px-4 py-2 rounded-lg text-sm hover:bg-amber-800">
+      <a href="/admin-dashboard" class="w-full sm:w-auto text-center bg-amber-700 text-[#fdf0d5] border border-amber-700 px-4 py-2 rounded-lg text-sm hover:bg-amber-800">
         <i class="fas fa-arrow-left mr-1"></i> Back
       </a>
     </div>
@@ -74,13 +74,13 @@
         <p class="text-amber-700 text-sm mb-2">Current Status: <span class="font-semibold text-amber-950"><%= requestData.status %></span></p>
         <p class="text-amber-700 text-xs mb-4">Created: <%= new Date(requestData.created_at).toLocaleString() %></p>
 
-        <form action="/admin/withdraw-requests/<%= requestData.id %>/status" method="POST" class="flex flex-wrap items-center gap-3">
-          <select name="status" class="bg-[#fdf0d5] border border-amber-300 rounded-lg px-3 py-2 text-sm text-amber-950 outline-none">
+        <form action="/admin/withdraw-requests/<%= requestData.id %>/status" method="POST" class="flex flex-col sm:flex-row sm:items-center gap-3">
+          <select name="status" class="w-full sm:w-auto bg-[#fdf0d5] border border-amber-300 rounded-lg px-3 py-2 text-sm text-amber-950 outline-none">
             <option value="pending" <%= String(requestData.status).toLowerCase() === "pending" ? "selected" : "" %>>Pending</option>
             <option value="completed" <%= String(requestData.status).toLowerCase() === "completed" ? "selected" : "" %>>Completed</option>
             <option value="failed" <%= String(requestData.status).toLowerCase() === "failed" ? "selected" : "" %>>Failed</option>
           </select>
-          <button type="submit" class="bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-sm px-4 py-2 rounded-lg">
+          <button type="submit" class="w-full sm:w-auto bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-sm px-4 py-2 rounded-lg">
             Update Status
           </button>
         </form>

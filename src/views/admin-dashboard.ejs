@@ -16,20 +16,20 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-[#fdf0d5] p-4">
+<body class="min-h-screen bg-[#fdf0d5] p-3 sm:p-4">
   <div class="w-full">
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
       <div class="flex items-center gap-3">
         <i class="fas fa-user-shield text-amber-700 text-3xl"></i>
-        <h1 class="text-3xl font-bold text-amber-950">Admin Dashboard</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-amber-950">Admin Dashboard</h1>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap lg:flex-nowrap w-full lg:w-auto">
         <div class="relative" id="notificationContainer">
           <button id="notificationButton" class="h-11 w-11 rounded-full bg-[#fdf0d5] border border-amber-300 text-amber-900 hover:bg-amber-100">
             <i class="fas fa-bell"></i>
           </button>
-          <div id="notificationPanel" class="hidden absolute right-0 mt-2 w-[420px] max-w-[90vw] bg-[#fff8ea] border border-amber-300 rounded-2xl p-3 z-50">
+          <div id="notificationPanel" class="hidden absolute right-0 mt-2 w-[92vw] sm:w-[420px] max-w-[92vw] bg-[#fff8ea] border border-amber-300 rounded-2xl p-3 z-50">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-sm font-semibold text-amber-950">Pending Withdrawal Requests</h3>
               <span class="text-xs text-amber-700">pending only</span>
@@ -80,9 +80,9 @@
     </div>
 
     <div class="mb-8">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
         <h2 class="text-xl font-semibold text-amber-950 flex items-center gap-2"><i class="fas fa-link text-amber-700"></i> Review Links</h2>
-        <button id="toggleReviewForm" class="bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-sm px-4 py-2 rounded-full">
+        <button id="toggleReviewForm" class="w-full sm:w-auto bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-sm px-4 py-2 rounded-full">
           <i class="fas fa-plus mr-1"></i> Add Review Link
         </button>
       </div>
@@ -105,7 +105,7 @@
       </form>
 
       <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-1 overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-[760px] w-full">
           <thead class="text-amber-700 text-sm border-b border-amber-300">
             <tr>
               <th class="text-left px-4 py-3 font-medium">ID</th>
@@ -148,7 +148,7 @@
       <% } %>
 
       <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-1 overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-[980px] w-full">
           <thead class="text-amber-700 text-sm border-b border-amber-300">
             <tr>
               <th class="text-left px-4 py-3 font-medium">ID</th>
@@ -171,7 +171,7 @@
                   <td class="px-4 py-3"><%= user.status %></td>
                   <td class="px-4 py-3 text-amber-700 text-xs"><%= new Date(user.created_at).toLocaleString() %></td>
                   <td class="px-4 py-3">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                       <form action="/admin/users/<%= user.id %>/status" method="POST">
                         <input type="hidden" name="status" value="<%= (user.status || '').toLowerCase() === 'block' ? 'active' : 'block' %>">
                         <button type="submit" class="bg-amber-700/60 border border-amber-600/50 hover:bg-amber-700/80 text-white text-xs px-3 py-1.5 rounded-full">

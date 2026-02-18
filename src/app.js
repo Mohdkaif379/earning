@@ -22,6 +22,26 @@ const getRechargeScannerImage = (req) => {
   return null;
 };
 
+const isAllowedRedirectUrl = (value) => {
+  if (!value) return false;
+  if (value.startsWith("/")) return true;
+  const schemeMatch = value.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+  if (!schemeMatch) return false;
+  const scheme = schemeMatch[1].toLowerCase();
+  return !["javascript", "data", "vbscript", "file"].includes(scheme);
+};
+
+const getRechargeGatewayUrl = (scannerImage) => {
+  const gatewayUrl = String(process.env.RECHARGE_GATEWAY_URL || "").trim();
+  if (gatewayUrl && isAllowedRedirectUrl(gatewayUrl)) {
+    return gatewayUrl;
+  }
+  if (scannerImage && isAllowedRedirectUrl(scannerImage)) {
+    return scannerImage;
+  }
+  return null;
+};
+
 
 // Middleware
 app.use(express.json());
@@ -605,8 +625,9 @@ app.get("/recharge", requireMemberAuth, async (req, res) => {
     const walletAmount = walletRows.length ? Number(walletRows[0].amount) || 0 : 0;
     req.session.member.wallet = walletAmount;
 
-    let unlockAtText = null;
     const scannerImage = getRechargeScannerImage(req);
+    const paymentGatewayUrl = getRechargeGatewayUrl(scannerImage);
+    let unlockAtText = null;
     if (req.query.unlockAt) {
       const unlockAtDate = new Date(req.query.unlockAt);
       if (!Number.isNaN(unlockAtDate.getTime())) {
@@ -620,17 +641,20 @@ app.get("/recharge", requireMemberAuth, async (req, res) => {
       rechargeError: req.query.rechargeError || null,
       rechargeSuccess: req.query.rechargeSuccess || null,
       unlockAtText,
-      scannerImage
+      scannerImage,
+      paymentGatewayUrl
     });
   } catch (error) {
     console.error("Error loading recharge page:", error.message);
+    const scannerImage = getRechargeScannerImage(req);
     return res.render("recharge", {
       name: req.session.member.name,
       wallet: req.session.member.wallet ?? 0,
       rechargeError: "Failed to load recharge page.",
       rechargeSuccess: null,
       unlockAtText: null,
-      scannerImage: getRechargeScannerImage(req)
+      scannerImage,
+      paymentGatewayUrl: getRechargeGatewayUrl(scannerImage)
     });
   }
 });

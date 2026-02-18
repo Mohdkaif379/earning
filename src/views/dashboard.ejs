@@ -13,7 +13,7 @@
 <body class="min-h-screen bg-[#fdf0d5] text-amber-950">
 
   <div class="bg-[#fff8ea]/95 backdrop-blur-sm border-b border-amber-300 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
       <div class="flex items-center gap-2">
         <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
           <i class="fas fa-star text-white text-sm"></i>
@@ -21,27 +21,27 @@
         <span class="font-bold text-xl text-amber-950">EarnMoney</span>
       </div>
 
-      <div class="flex items-center gap-3">
-        <a href="/wallet" class="flex items-center gap-2 bg-[#fdf0d5] px-4 py-2 rounded-full border border-amber-300 text-amber-900 transition hover:bg-amber-100">
+      <div class="flex w-full sm:w-auto items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+        <a href="/wallet" class="flex items-center gap-2 bg-[#fdf0d5] px-3 sm:px-4 py-2 rounded-full border border-amber-300 text-amber-900 transition hover:bg-amber-100">
           <i class="fas fa-wallet text-amber-700"></i>
           <span class="font-semibold" id="walletAmount"><%= wallet %></span>
         </a>
-        <a href="/recharge" class="flex items-center gap-2 bg-emerald-100 px-4 py-2 rounded-full border border-emerald-300 text-emerald-800 transition hover:bg-emerald-200">
+        <a href="/recharge" class="flex items-center gap-2 bg-emerald-100 px-3 sm:px-4 py-2 rounded-full border border-emerald-300 text-emerald-800 transition hover:bg-emerald-200">
           <i class="fas fa-bolt"></i>
-          <span class="hidden sm:inline">Recharge</span>
+          <span>Recharge</span>
         </a>
-        <a href="/logout" class="flex items-center gap-2 bg-red-100 px-4 py-2 rounded-full border border-red-300 text-red-700 transition hover:bg-red-200">
+        <a href="/logout" class="flex items-center gap-2 bg-red-100 px-3 sm:px-4 py-2 rounded-full border border-red-300 text-red-700 transition hover:bg-red-200">
           <i class="fas fa-right-from-bracket"></i>
-          
+          <span>Logout</span>
         </a>
-        <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 border border-amber-300">
+        <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 border border-amber-300 ml-auto sm:ml-0">
           <i class="fas fa-user text-sm"></i>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-6 py-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
     <div class="mb-8">
       <div class="flex items-center gap-3 mb-1">
         <h1 class="text-3xl font-bold text-amber-950">Hello, <span class="text-amber-700"><%= name %></span></h1>
@@ -49,7 +49,7 @@
     </div>
 
     <div class="bg-[#fff8ea] backdrop-blur-sm rounded-2xl border border-amber-300 p-6 md:p-7 mb-8 shadow-sm">
-      <div class="flex items-center gap-3 mb-6">
+      <div class="flex items-start sm:items-center gap-3 mb-6">
         <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white">
           <i class="fab fa-google"></i>
         </div>
@@ -64,15 +64,15 @@
           <% reviewLinks.forEach(function(link) { %>
             <a
               href="<%= link.url %>"
-              class="reward-link group flex items-center justify-between p-4 bg-[#fdf0d5] border border-amber-300 rounded-xl transition-all duration-200 <%= Number(link.clicked) ? 'opacity-60 pointer-events-none' : 'hover:border-amber-500' %>"
+              class="reward-link group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#fdf0d5] border border-amber-300 rounded-xl transition-all duration-200 <%= Number(link.clicked) ? 'opacity-60 pointer-events-none' : 'hover:border-amber-500' %>"
               data-link-id="<%= link.id %>"
               data-claimed="<%= Number(link.clicked) ? '1' : '0' %>"
             >
-              <div class="flex items-center gap-3 truncate">
+              <div class="flex items-center gap-3 min-w-0 w-full">
                 <div class="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 transition">
                   <i class="fas fa-link text-xs"></i>
                 </div>
-                <span class="font-medium text-amber-900 truncate max-w-[180px]"><%= link.title %></span>
+                <span class="font-medium text-amber-900 truncate max-w-full sm:max-w-[180px]"><%= link.title %></span>
               </div>
               <% if (Number(link.clicked)) { %>
                 <span class="flex items-center gap-1 bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold">
@@ -142,4 +142,3 @@
 
 </body>
 </html>
-
