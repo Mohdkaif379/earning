@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recharge Required</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="min-h-screen bg-[#fdf0d5] flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl bg-[#fff8ea] border border-amber-300 rounded-2xl p-5 sm:p-8 shadow-sm">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="h-11 w-11 rounded-xl bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center">
+        <i class="fas fa-bolt"></i>
+      </div>
+      <h1 class="text-2xl font-semibold text-amber-950">Recharge Required</h1>
+    </div>
+
+    <p class="text-amber-800 mb-2">Hello <span class="font-semibold text-amber-950"><%= name %></span>,</p>
+    <p class="text-amber-800 mb-5">
+      A recharge is required before your next withdrawal. Select an amount and payment method.
+    </p>
+
+    <% if (rechargeError) { %>
+      <div class="mb-4 text-sm text-red-700 bg-red-100 border border-red-300 rounded-lg px-3 py-2">
+        <%= rechargeError %>
+        <% if (unlockAtText) { %>
+          <span class="block mt-1 text-red-600">Withdraw available at: <%= unlockAtText %></span>
+        <% } %>
+      </div>
+    <% } %>
+
+    <% if (rechargeSuccess) { %>
+      <div class="mb-4 text-sm text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-lg px-3 py-2">
+        <%= String(rechargeSuccess).replace(" Wallet update in 2 minutes. Withdraw after 1 hour", "") %>
+      </div>
+    <% } %>
+
+    <div class="bg-[#fdf0d5] border border-amber-300 rounded-xl p-4 mb-6">
+      <p class="text-sm text-amber-700">Current Wallet</p>
+      <p class="text-3xl font-bold text-amber-950 mt-1">Rs <%= wallet %></p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="amountGrid">
+      <button type="button" data-amount="100" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 100</button>
+      <button type="button" data-amount="200" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 200</button>
+      <button type="button" data-amount="500" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 500</button>
+      <button type="button" data-amount="1000" class="recharge-amount bg-[#fdf0d5] border border-amber-300 rounded-xl py-3 font-semibold text-amber-900 hover:border-amber-500">Rs 1000</button>
+    </div>
+
+    <div class="mb-6">
+      <p class="text-sm font-medium text-amber-900 mb-2">Select Payment Method</p>
+      <div class="flex flex-wrap gap-3" id="paymentMethods">
+        <button type="button" data-method="UPI" class="payment-method bg-[#fdf0d5] border border-amber-300 rounded-lg px-4 py-2 text-amber-900 hover:border-amber-500">UPI</button>
+        <button type="button" data-method="PhonePe" class="payment-method bg-[#fdf0d5] border border-amber-300 rounded-lg px-4 py-2 text-amber-900 hover:border-amber-500">PhonePe</button>
+        <button type="button" data-method="Paytm" class="payment-method bg-[#fdf0d5] border border-amber-300 rounded-lg px-4 py-2 text-amber-900 hover:border-amber-500">Paytm</button>
+        <button type="button" data-method="GooglePay" class="payment-method bg-[#fdf0d5] border border-amber-300 rounded-lg px-4 py-2 text-amber-900 hover:border-amber-500">Google Pay</button>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <a href="/wallet" class="px-4 py-2 rounded-lg border border-amber-300 text-amber-900 hover:bg-amber-100">
+        Back to Wallet
+      </a>
+      <a href="/dashboard" class="px-4 py-2 rounded-lg bg-amber-700 text-[#fdf0d5] hover:bg-amber-800">
+        Go to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div id="qrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div id="qrModalBackdrop" class="absolute inset-0 bg-amber-950/40"></div>
+    <div class="relative w-full max-w-md border border-amber-300 rounded-xl p-5 bg-[#fdf0d5]">
+      <button id="closeQrModal" type="button" class="absolute top-3 right-3 h-8 w-8 rounded-full border border-amber-300 text-amber-800 hover:bg-amber-100">
+        <i class="fas fa-times"></i>
+      </button>
+      <p class="text-sm text-amber-800 mb-2">Scan and pay:</p>
+      <p class="text-sm font-medium text-amber-950 mb-4">
+        Amount: <span id="selectedAmountText"></span> | Method: <span id="selectedMethodText"></span>
+      </p>
+      <img id="qrImage" src="" alt="Payment QR" class="w-56 h-56 border border-amber-300 bg-[#fff8ea] rounded-lg p-2 mx-auto" />
+      <p id="paymentCountdown" class="mt-3 text-sm text-amber-800 hidden text-center">
+        Time left: <span id="paymentCountdownValue" class="font-semibold text-amber-950">05:00</span>
+      </p>
+
+      <form id="rechargeForm" action="/recharge" method="POST" class="mt-4">
+        <input type="hidden" id="selectedAmountInput" name="amount" />
+        <input type="hidden" id="selectedMethodInput" name="paymentMethod" />
+        <button id="confirmRechargeBtn" type="submit" class="w-full px-4 py-2 rounded-lg bg-amber-700 text-[#fdf0d5] hover:bg-amber-800 disabled:opacity-60 disabled:cursor-not-allowed" disabled>
+          Proceed to Pay
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      let selectedAmount = null;
+      let selectedMethod = null;
+      const providedScannerImage = <%- JSON.stringify(scannerImage || "") %>;
+
+      const amountButtons = document.querySelectorAll('.recharge-amount');
+      const methodButtons = document.querySelectorAll('.payment-method');
+      const qrModal = document.getElementById('qrModal');
+      const qrModalBackdrop = document.getElementById('qrModalBackdrop');
+      const closeQrModalBtn = document.getElementById('closeQrModal');
+      const qrImage = document.getElementById('qrImage');
+      const selectedAmountText = document.getElementById('selectedAmountText');
+      const selectedMethodText = document.getElementById('selectedMethodText');
+      const selectedAmountInput = document.getElementById('selectedAmountInput');
+      const selectedMethodInput = document.getElementById('selectedMethodInput');
+      const confirmRechargeBtn = document.getElementById('confirmRechargeBtn');
+      const rechargeForm = document.getElementById('rechargeForm');
+      const paymentCountdown = document.getElementById('paymentCountdown');
+      const paymentCountdownValue = document.getElementById('paymentCountdownValue');
+      let countdownInterval = null;
+      let countdownEndsAt = 0;
+
+      function formatTime(msRemaining) {
+        const totalSeconds = Math.max(0, Math.ceil(msRemaining / 1000));
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        return `${minutes}:${seconds}`;
+      }
+
+      function stopCountdown() {
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+      }
+
+      function closeQrModal() {
+        if (qrModal) qrModal.classList.add('hidden');
+        if (paymentCountdown) paymentCountdown.classList.add('hidden');
+        if (confirmRechargeBtn) confirmRechargeBtn.disabled = true;
+        stopCountdown();
+      }
+
+      function startCountdown() {
+        stopCountdown();
+        countdownEndsAt = Date.now() + 5 * 60 * 1000;
+        if (paymentCountdown) paymentCountdown.classList.remove('hidden');
+        if (paymentCountdownValue) paymentCountdownValue.textContent = '05:00';
+
+        countdownInterval = setInterval(function () {
+          const remaining = countdownEndsAt - Date.now();
+          if (paymentCountdownValue) paymentCountdownValue.textContent = formatTime(remaining);
+
+          if (remaining <= 0) {
+            stopCountdown();
+            if (confirmRechargeBtn) confirmRechargeBtn.disabled = true;
+          }
+        }, 1000);
+      }
+
+      function updateQr() {
+        if (!selectedAmount || !selectedMethod) {
+          if (qrModal) qrModal.classList.add('hidden');
+          if (confirmRechargeBtn) confirmRechargeBtn.disabled = true;
+          if (paymentCountdown) paymentCountdown.classList.add('hidden');
+          stopCountdown();
+          return;
+        }
+
+        const payload = `Recharge ${selectedAmount} via ${selectedMethod}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(payload)}`;
+        qrImage.src = providedScannerImage || qrUrl;
+        selectedAmountText.textContent = `Rs ${selectedAmount}`;
+        selectedMethodText.textContent = selectedMethod;
+        if (selectedAmountInput) selectedAmountInput.value = selectedAmount;
+        if (selectedMethodInput) selectedMethodInput.value = selectedMethod;
+        if (confirmRechargeBtn) confirmRechargeBtn.disabled = false;
+        if (qrModal) qrModal.classList.remove('hidden');
+        startCountdown();
+      }
+
+      amountButtons.forEach((btn) => {
+        btn.addEventListener('click', function () {
+          selectedAmount = this.dataset.amount;
+          amountButtons.forEach((b) => b.classList.remove('bg-amber-700', 'text-[#fdf0d5]', 'border-amber-700'));
+          this.classList.add('bg-amber-700', 'text-[#fdf0d5]', 'border-amber-700');
+          updateQr();
+        });
+      });
+
+      methodButtons.forEach((btn) => {
+        btn.addEventListener('click', function () {
+          selectedMethod = this.dataset.method;
+          methodButtons.forEach((b) => b.classList.remove('bg-amber-700', 'text-[#fdf0d5]', 'border-amber-700'));
+          this.classList.add('bg-amber-700', 'text-[#fdf0d5]', 'border-amber-700');
+          updateQr();
+        });
+      });
+
+      if (rechargeForm) {
+        rechargeForm.addEventListener('submit', function (e) {
+          if (!selectedAmount || !selectedMethod || Date.now() > countdownEndsAt) {
+            e.preventDefault();
+          }
+        });
+      }
+
+      if (closeQrModalBtn) {
+        closeQrModalBtn.addEventListener('click', closeQrModal);
+      }
+
+      if (qrModalBackdrop) {
+        qrModalBackdrop.addEventListener('click', closeQrModal);
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && qrModal && !qrModal.classList.contains('hidden')) {
+          closeQrModal();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
+

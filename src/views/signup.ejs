@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Member Signup · flex form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* subtle animated white background (consistent pulse) */
+    @keyframes softBreath {
+      0% { background-color: #ffffff; }
+      50% { background-color: #fbf6ec; }
+      100% { background-color: #ffffff; }
+    }
+    .animate-white-pulse {
+      animation: softBreath 8s ease-in-out infinite;
+    }
+    /* very light dot texture for background depth */
+    .bg-dots-soft {
+      background-image: radial-gradient(rgba(140, 100, 60, 0.05) 1px, transparent 1px);
+      background-size: 34px 34px;
+    }
+    .card-elevation {
+      box-shadow: 0 20px 30px -10px rgba(100, 70, 40, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 animate-white-pulse bg-dots-soft">
+
+  <!-- centered card – no left content, just form with flex/grid layout -->
+  <div class="w-full max-w-3xl mx-auto bg-white/95 backdrop-blur-sm rounded-3xl border border-amber-200/60 card-elevation overflow-hidden">
+    <div class="p-7 sm:p-9">
+      <!-- header -->
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-amber-950">Member Signup</h1>
+        <p class="text-amber-700/80 text-sm mt-1">Create your account in a few seconds</p>
+      </div>
+
+      <!-- error block (compatible with EJS) -->
+      <% if (typeof memberError !== "undefined" && memberError) { %>
+      <div class="mb-5 text-sm text-red-700 bg-red-100 border border-red-300 rounded-lg px-4 py-2.5"><i class="fas fa-exclamation-circle mr-1"></i> <%= memberError %></div>
+      <% } %>
+
+      <!-- FORM – fields arranged with flex/grid for responsiveness -->
+      <form action="/member/signup" method="POST" class="space-y-5">
+        <!-- name + email row (flex wrap, full width on small screens) -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-amber-800 mb-1.5"><i class="fas fa-user mr-1 text-amber-600"></i>Full name</label>
+            <input type="text" name="name" required
+                   class="w-full border border-amber-300 bg-[#fdf0d5] text-amber-950 rounded-lg px-4 py-3 placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+                   placeholder="John Doe" />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-amber-800 mb-1.5"><i class="fas fa-envelope mr-1 text-amber-600"></i>Email</label>
+            <input type="email" name="email" required
+                   class="w-full border border-amber-300 bg-[#fdf0d5] text-amber-950 rounded-lg px-4 py-3 placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+                   placeholder="john@example.com" />
+          </div>
+        </div>
+
+        <!-- phone row (full width but can be combined later if needed, here it's standalone) -->
+        <div>
+          <label class="block text-sm font-medium text-amber-800 mb-1.5"><i class="fas fa-phone-alt mr-1 text-amber-600"></i>Phone number</label>
+          <input type="tel" name="phone" required
+                 class="w-full border border-amber-300 bg-[#fdf0d5] text-amber-950 rounded-lg px-4 py-3 placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+                 placeholder="9876543210" />
+        </div>
+
+        <!-- password + confirm row (flex) -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-amber-800 mb-1.5"><i class="fas fa-lock mr-1 text-amber-600"></i>Password</label>
+            <input type="password" name="password" required
+                   class="w-full border border-amber-300 bg-[#fdf0d5] text-amber-950 rounded-lg px-4 py-3 placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+                   placeholder="••••••••" />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-amber-800 mb-1.5"><i class="fas fa-check-circle mr-1 text-amber-600"></i>Confirm password</label>
+            <input type="password" name="confirmPassword" required
+                   class="w-full border border-amber-300 bg-[#fdf0d5] text-amber-950 rounded-lg px-4 py-3 placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+                   placeholder="••••••••" />
+          </div>
+        </div>
+
+        <!-- optional terms & submit button -->
+        <div class="flex items-start gap-2 text-sm text-amber-800 mt-2">
+          <input type="checkbox" id="terms" class="mt-1 accent-amber-700" checked required />
+          <label for="terms">I agree to the <a href="#" class="text-amber-700 underline font-medium">Terms</a> and <a href="#" class="text-amber-700 underline">Privacy Policy</a>.</label>
+        </div>
+
+        <button type="submit" class="w-full bg-amber-700 hover:bg-amber-800 text-[#fdf0d5] py-3.5 rounded-lg font-semibold transition shadow-sm hover:shadow-md flex items-center justify-center gap-2 text-base">
+          <i class="fas fa-user-plus"></i> Create account
+        </button>
+      </form>
+
+      <!-- footer link -->
+      <p class="text-center mt-6 text-sm text-amber-800">
+        Already have an account? <a href="/" class="text-amber-700 hover:text-amber-900 font-medium underline">Log in</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

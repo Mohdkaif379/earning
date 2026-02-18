@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      background: #fdf0d5;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    * {
+      box-shadow: none !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#fdf0d5] p-4">
+  <div class="w-full">
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-user-shield text-amber-700 text-3xl"></i>
+        <h1 class="text-3xl font-bold text-amber-950">Admin Dashboard</h1>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="relative" id="notificationContainer">
+          <button id="notificationButton" class="h-11 w-11 rounded-full bg-[#fdf0d5] border border-amber-300 text-amber-900 hover:bg-amber-100">
+            <i class="fas fa-bell"></i>
+          </button>
+          <div id="notificationPanel" class="hidden absolute right-0 mt-2 w-[420px] max-w-[90vw] bg-[#fff8ea] border border-amber-300 rounded-2xl p-3 z-50">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold text-amber-950">Pending Withdrawal Requests</h3>
+              <span class="text-xs text-amber-700">pending only</span>
+            </div>
+            <div id="withdrawRequestsList" class="max-h-80 overflow-auto space-y-2 text-sm">
+              <div class="text-amber-700">Click bell to load requests...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative" id="userMenuContainer">
+          <button id="userMenuButton" class="flex items-center gap-2 bg-[#fdf0d5] border border-amber-300 rounded-full py-1 pl-1 pr-4 text-amber-900 hover:bg-amber-100">
+            <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 border border-amber-300">
+              <i class="fas fa-user-circle text-xl"></i>
+            </div>
+            <span class="font-medium text-amber-900 max-w-[100px] truncate"><%= username %></span>
+            <i class="fas fa-chevron-down text-xs text-amber-700"></i>
+          </button>
+
+          <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-[#fff8ea] border border-amber-300 rounded-xl py-1 z-50">
+            <div class="px-4 py-2 border-b border-amber-300">
+              <p class="text-xs text-amber-700">Signed in as</p>
+              <p class="text-sm font-semibold text-amber-950 truncate"><%= username %></p>
+            </div>
+            <a href="/logout" class="flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-amber-100">
+              <i class="fas fa-right-from-bracket"></i> Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-amber-800 mb-6">Welcome, <span class="font-semibold text-amber-950"><%= username %></span></p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-5">
+        <p class="text-xs uppercase tracking-wider text-amber-700">Role</p>
+        <p class="text-2xl font-medium text-amber-950 mt-1">Admin</p>
+      </div>
+      <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-5">
+        <p class="text-xs uppercase tracking-wider text-amber-700">Status</p>
+        <p class="text-2xl font-medium text-amber-950 mt-1">Active</p>
+      </div>
+      <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-5">
+        <p class="text-xs uppercase tracking-wider text-amber-700">Wallet</p>
+        <p class="text-2xl font-medium text-amber-950 mt-1">Rs <%= Number(totalWithdrawn || 0).toLocaleString() %></p>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xl font-semibold text-amber-950 flex items-center gap-2"><i class="fas fa-link text-amber-700"></i> Review Links</h2>
+        <button id="toggleReviewForm" class="bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-sm px-4 py-2 rounded-full">
+          <i class="fas fa-plus mr-1"></i> Add Review Link
+        </button>
+      </div>
+
+      <% if (linkError) { %>
+      <div class="mb-4 text-sm text-red-200 bg-red-900/40 border border-red-700/50 rounded-lg px-3 py-2"><%= linkError %></div>
+      <% } %>
+      <% if (linkSuccess) { %>
+      <div class="mb-4 text-sm text-emerald-200 bg-emerald-900/40 border border-emerald-700/50 rounded-lg px-3 py-2"><%= linkSuccess %></div>
+      <% } %>
+
+      <form id="reviewLinkForm" action="/admin/review-links" method="POST" class="hidden bg-[#fff8ea] border border-amber-300 rounded-2xl p-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input type="text" name="title" placeholder="Link title" class="bg-[#fdf0d5] border border-amber-300 rounded-lg px-3 py-2 text-amber-950 placeholder-amber-700 outline-none" required />
+          <input type="text" name="url" placeholder="https://example.com/review" class="bg-[#fdf0d5] border border-amber-300 rounded-lg px-3 py-2 text-amber-950 placeholder-amber-700 outline-none md:col-span-2" required />
+        </div>
+        <div class="mt-3">
+          <button type="submit" class="bg-amber-700 border border-amber-700 hover:bg-amber-800 text-[#fdf0d5] text-sm px-4 py-2 rounded-full">Save Link</button>
+        </div>
+      </form>
+
+      <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-1 overflow-x-auto">
+        <table class="min-w-full">
+          <thead class="text-amber-700 text-sm border-b border-amber-300">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium">ID</th>
+              <th class="text-left px-4 py-3 font-medium">Title</th>
+              <th class="text-left px-4 py-3 font-medium">URL</th>
+              <th class="text-left px-4 py-3 font-medium">Created</th>
+              <th class="text-left px-4 py-3 font-medium">Action</th>
+            </tr>
+          </thead>
+          <tbody class="text-amber-900 text-sm">
+            <% if (reviewLinks && reviewLinks.length) { %>
+              <% reviewLinks.forEach(function(link) { %>
+                <tr class="border-b border-amber-300 hover:bg-amber-100">
+                  <td class="px-4 py-3"><%= link.id %></td>
+                  <td class="px-4 py-3"><%= link.title %></td>
+                  <td class="px-4 py-3 max-w-[320px] truncate"><a href="<%= link.url %>" target="_blank" class="text-amber-800 underline"><%= link.url %></a></td>
+                  <td class="px-4 py-3 text-amber-700 text-xs"><%= new Date(link.created_at).toLocaleString() %></td>
+                  <td class="px-4 py-3">
+                    <form action="/admin/review-links/<%= link.id %>/delete" method="POST" onsubmit="return confirm('Delete this review link?')">
+                      <button type="submit" class="bg-red-800/60 border border-red-700/50 hover:bg-red-800/80 text-white text-xs px-3 py-1.5 rounded-full">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="px-4 py-5 text-center text-amber-700">No review links added yet.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold text-amber-950 mb-4 flex items-center gap-2"><i class="fas fa-users text-amber-700"></i> All Members</h2>
+
+      <% if (usersError) { %>
+      <div class="mb-4 text-sm text-red-200 bg-red-900/40 border border-red-700/50 rounded-lg px-3 py-2"><%= usersError %></div>
+      <% } %>
+
+      <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-1 overflow-x-auto">
+        <table class="min-w-full">
+          <thead class="text-amber-700 text-sm border-b border-amber-300">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium">ID</th>
+              <th class="text-left px-4 py-3 font-medium">Name</th>
+              <th class="text-left px-4 py-3 font-medium">Email</th>
+              <th class="text-left px-4 py-3 font-medium">Phone</th>
+              <th class="text-left px-4 py-3 font-medium">Status</th>
+              <th class="text-left px-4 py-3 font-medium">Joined</th>
+              <th class="text-left px-4 py-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-amber-900 text-sm">
+            <% if (users && users.length) { %>
+              <% users.forEach(function(user) { %>
+                <tr class="border-b border-amber-300 hover:bg-amber-100">
+                  <td class="px-4 py-3"><%= user.id %></td>
+                  <td class="px-4 py-3 font-medium"><%= user.name %></td>
+                  <td class="px-4 py-3"><%= user.email %></td>
+                  <td class="px-4 py-3"><%= user.phone %></td>
+                  <td class="px-4 py-3"><%= user.status %></td>
+                  <td class="px-4 py-3 text-amber-700 text-xs"><%= new Date(user.created_at).toLocaleString() %></td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-2">
+                      <form action="/admin/users/<%= user.id %>/status" method="POST">
+                        <input type="hidden" name="status" value="<%= (user.status || '').toLowerCase() === 'block' ? 'active' : 'block' %>">
+                        <button type="submit" class="bg-amber-700/60 border border-amber-600/50 hover:bg-amber-700/80 text-white text-xs px-3 py-1.5 rounded-full">
+                          <%= (user.status || '').toLowerCase() === 'block' ? 'Active' : 'Block' %>
+                        </button>
+                      </form>
+                      <form action="/admin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Delete this user?')">
+                        <button type="submit" class="bg-red-800/60 border border-red-700/50 hover:bg-red-800/80 text-white text-xs px-3 py-1.5 rounded-full">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" class="px-4 py-5 text-center text-amber-700">No users found.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const button = document.getElementById('userMenuButton');
+      const dropdown = document.getElementById('userDropdown');
+      const notificationButton = document.getElementById('notificationButton');
+      const notificationPanel = document.getElementById('notificationPanel');
+      const withdrawRequestsList = document.getElementById('withdrawRequestsList');
+      const toggleReviewForm = document.getElementById('toggleReviewForm');
+      const reviewLinkForm = document.getElementById('reviewLinkForm');
+
+      if (button && dropdown) {
+        button.addEventListener('click', function (e) {
+          e.stopPropagation();
+          dropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      if (toggleReviewForm && reviewLinkForm) {
+        toggleReviewForm.addEventListener('click', function () {
+          reviewLinkForm.classList.toggle('hidden');
+        });
+      }
+
+      if (notificationButton && notificationPanel && withdrawRequestsList) {
+        notificationButton.addEventListener('click', async function (e) {
+          e.stopPropagation();
+          notificationPanel.classList.toggle('hidden');
+          dropdown.classList.add('hidden');
+          if (notificationPanel.classList.contains('hidden')) return;
+
+          withdrawRequestsList.innerHTML = '<div class="text-amber-700">Loading...</div>';
+          try {
+            const res = await fetch('/admin/withdraw-requests');
+            const data = await res.json();
+            const requests = data.requests || [];
+
+            if (!requests.length) {
+              withdrawRequestsList.innerHTML = '<div class="text-amber-700">No pending withdrawal requests.</div>';
+              return;
+            }
+
+            withdrawRequestsList.innerHTML = requests.map(function (item) {
+              const status = String(item.status || '').toLowerCase();
+              const statusCls = status === 'pending'
+                ? 'bg-amber-100 text-amber-800'
+                : status === 'completed'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-red-100 text-red-700';
+              const accountLast4 = String(item.account_number || '').slice(-4);
+              return `
+                <a href="/admin/withdraw-requests/${item.id}" class="block bg-[#fdf0d5] border border-amber-300 rounded-lg p-3 hover:bg-amber-100 transition">
+                  <div class="flex items-center justify-between">
+                    <p class="text-amber-950 font-medium">${item.user_name} (${item.user_phone})</p>
+                    <span class="px-2 py-0.5 rounded-full text-xs ${statusCls}">${item.status}</span>
+                  </div>
+                  <p class="text-amber-800 text-xs mt-1">Amount: Rs ${Number(item.amount).toLocaleString()} | Ref: ${item.reference}</p>
+                  <p class="text-amber-800 text-xs">Bank: ${item.bank_name} ..${accountLast4} | IFSC: ${item.ifsc_code}</p>
+                  <p class="text-amber-700 text-xs mt-1">${new Date(item.created_at).toLocaleString()}</p>
+                </a>
+              `;
+            }).join('');
+          } catch (err) {
+            withdrawRequestsList.innerHTML = '<div class="text-red-200">Failed to fetch requests.</div>';
+          }
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!notificationButton.contains(event.target) && !notificationPanel.contains(event.target)) {
+            notificationPanel.classList.add('hidden');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

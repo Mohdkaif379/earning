@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Member Login · icons</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* keep subtle animated white background if desired — but original uses fixed #fdf0d5.
+       We'll keep exactly the same background as original, only add icons. */
+  </style>
+</head>
+<body class="min-h-screen bg-[#fdf0d5] flex items-center justify-center px-4 py-6 sm:px-6">
+
+  <div class="w-full max-w-md mx-auto">
+    <!-- header with icon -->
+    <h1 class="text-2xl sm:text-3xl font-bold text-amber-950 text-center mb-6 sm:mb-8">
+      <i class="fas fa-user-circle mr-2 text-amber-700"></i> Member Login
+    </h1>
+
+    <div class="bg-[#fff8ea] border border-amber-300 rounded-2xl p-5 sm:p-6 shadow-sm">
+      <% if (typeof memberError !== "undefined" && memberError) { %>
+      <div class="mb-4 text-sm text-red-700 bg-red-100 border border-red-300 rounded-lg px-3 py-2">
+        <i class="fas fa-exclamation-circle mr-1"></i> <%= memberError %>
+      </div>
+      <% } %>
+
+      <form action="/member/login" method="POST" class="space-y-4 sm:space-y-5">
+        <!-- phone field with icon inside label / input group? we add icon to label -->
+        <div>
+          <label class="block text-sm font-medium text-amber-900 mb-1.5">
+            <i class="fas fa-phone-alt mr-1 text-amber-600"></i> Phone
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600/70 text-sm"><i class="fas fa-mobile-alt"></i></span>
+            <input
+              type="tel"
+              name="phone"
+              required
+              inputmode="numeric"
+              autocomplete="tel"
+              class="w-full border border-amber-300 rounded-lg pl-9 pr-3.5 py-3 text-amber-950 bg-[#fdf0d5] placeholder-amber-700/50 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/40"
+              placeholder="9876543210"
+            />
+          </div>
+        </div>
+
+        <!-- password field with icon inside -->
+        <div>
+          <label class="block text-sm font-medium text-amber-900 mb-1.5">
+            <i class="fas fa-lock mr-1 text-amber-600"></i> Password
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600/70"><i class="fas fa-key"></i></span>
+            <input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              class="w-full border border-amber-300 rounded-lg pl-9 pr-3.5 py-3 text-amber-950 bg-[#fdf0d5] placeholder-amber-700/50 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/40"
+              placeholder="********"
+            />
+          </div>
+        </div>
+
+        <!-- submit button with icon -->
+        <button type="submit" class="w-full bg-amber-700 hover:bg-amber-800 text-[#fdf0d5] py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+
+        <!-- optional extra links with icons (forgot password?) can be added if desired -->
+        <div class="flex justify-end text-xs sm:text-sm">
+          <a href="#" class="text-amber-600 hover:text-amber-800 inline-flex items-center gap-1">
+            <i class="fas fa-question-circle"></i> Forgot password?
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- signup link with icon -->
+    <p class="text-center mt-5 sm:mt-6 text-sm text-amber-900">
+      <i class="fas fa-user-plus mr-1 text-amber-600"></i> New here? 
+      <a href="/signup" class="text-amber-700 hover:text-amber-800 underline font-medium">Create an account</a>
+    </p>
+  </div>
+</body>
+</html>

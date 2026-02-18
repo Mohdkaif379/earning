@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login · animated white body</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* gentle pulse animation on the white background (body) */
+    @keyframes whitePulse {
+      0% { background-color: #ffffff; }
+      50% { background-color: #fbf8f0; } /* soft cream */
+      100% { background-color: #ffffff; }
+    }
+    .animate-white-pulse {
+      animation: whitePulse 7s ease-in-out infinite;
+    }
+
+    /* optional floating dots – super subtle, barely visible */
+    .bg-dots-soft {
+      background-image: radial-gradient(rgba(160, 120, 70, 0.05) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+
+    /* left card subtle depth */
+    .card-elevation {
+      box-shadow: 0 20px 35px -12px rgba(90, 60, 30, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 animate-white-pulse bg-dots-soft">
+
+  <!-- main container: split horizontally on md+, stacked on mobile -->
+  <div class="w-full max-w-5xl mx-auto flex flex-col md:flex-row rounded-3xl overflow-hidden bg-white/90 backdrop-blur-sm card-elevation border border-amber-200/50">
+
+    <!-- LEFT SIDE: warm content panel (same palette, no animation here) -->
+    <div class="w-full md:w-1/2 bg-[#fdf0d5] p-7 sm:p-9 flex flex-col justify-between relative">
+      <!-- very faint pattern -->
+      <div class="absolute inset-0 opacity-20 pointer-events-none" style="background: repeating-linear-gradient(45deg, #b48b5a20 0px, #b48b5a20 2px, transparent 2px, transparent 12px);"></div>
+
+      <div class="relative z-10">
+        <span class="inline-block bg-amber-200/60 text-amber-900 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 border border-amber-300/40 backdrop-blur-sm">🔐 admin zone</span>
+
+        <h2 class="text-3xl sm:text-4xl font-bold text-amber-950 leading-tight">Welcome back,<br>administrator</h2>
+
+        <p class="mt-4 text-amber-800/90 text-base sm:text-lg max-w-sm leading-relaxed">
+          Manage products, orders, and settings. Everything at your fingertips.
+        </p>
+
+        <!-- feature bullet list (decorative) -->
+        <ul class="mt-8 space-y-3 text-amber-900">
+          <li class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-full bg-amber-600/20 flex items-center justify-center text-amber-800 text-sm">✓</span>
+            <span class="text-sm sm:text-base">Real‑time dashboard</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-full bg-amber-600/20 flex items-center justify-center text-amber-800 text-sm">✓</span>
+            <span class="text-sm sm:text-base">Inventory & orders</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-full bg-amber-600/20 flex items-center justify-center text-amber-800 text-sm">✓</span>
+            <span class="text-sm sm:text-base">Team & permissions</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- bottom quote -->
+      <div class="relative z-10 mt-8 text-sm italic text-amber-700/70 border-l-3 border-amber-400 pl-4">
+        “Your central command post.”
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: white background form (pure white, but body animation also softly reflects) -->
+    <div class="w-full md:w-1/2 bg-white p-7 sm:p-9 flex items-center">
+      <div class="w-full max-w-sm mx-auto">
+        <h3 class="text-xl font-semibold text-amber-900 mb-2">Admin sign in</h3>
+        <p class="text-sm text-amber-700/80 mb-6">Use your credentials to access the panel.</p>
+
+        <!-- demo error (hidden by default) – backend can inject -->
+        <div class="mb-4 text-sm text-red-700 bg-red-100 border border-red-300 rounded-lg px-3 py-2 hidden">⚠️ Invalid login (demo)</div>
+
+        <!-- form (same style as original, with warm input fields) -->
+        <form action="/admin/login" method="POST" class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-amber-800 mb-1.5">Username</label>
+            <input
+              type="text"
+              name="username"
+              required
+              autocomplete="username"
+              class="w-full border border-amber-300 rounded-lg px-3.5 py-3 text-amber-950 bg-[#fdf0d5] placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+              placeholder="admin123"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-amber-800 mb-1.5">Password</label>
+            <input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              class="w-full border border-amber-300 rounded-lg px-3.5 py-3 text-amber-950 bg-[#fdf0d5] placeholder-amber-700 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/60"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button type="submit" class="w-full bg-amber-700 hover:bg-amber-800 text-[#fdf0d5] py-3 rounded-lg font-semibold transition shadow-sm hover:shadow-md">
+            Login
+          </button>
+        </form>
+
+        <!-- extra links (signup & forgot) -->
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-2 text-sm">
+          <a href="/admin/signup" class="text-amber-700 hover:text-amber-800 underline font-medium">Create admin account</a>
+          <a href="#" class="text-amber-600 hover:text-amber-700">Forgot password?</a>
+        </div>
+
+        <p class="text-xs text-amber-500/70 mt-6 text-center">© 2025 · secured area</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- server-side error rendering (commented example, ready for EJS) -->
+  <% if (typeof adminError !== "undefined" && adminError) { %>
+    <!-- the actual error will be shown inside the white card if needed. 
+         we keep the structure to match original, but we moved it above the form.
+         you can uncomment the hidden div and bind text with <%= adminError %> -->
+  <% } %>
+  <!-- to test animated white body, just observe the background shifting between white and soft cream -->
+</body>
+</html>

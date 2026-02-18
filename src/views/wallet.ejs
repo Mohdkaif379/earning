@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vault - INR wallet - withdrawal history</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      background: #f5f7fc;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .card-hover {
+      transition: all 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 24px -10px rgba(0,70,150,0.15);
+    }
+    #withdrawModal {
+      transition: opacity 0.2s ease;
+    }
+    tbody tr:hover {
+      background-color: #fff5e3;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#fdf0d5] text-amber-950">
+
+  <div class="w-full max-w-full px-4 sm:px-8 lg:px-12 py-8">
+
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <div class="h-11 w-11 rounded-xl bg-amber-700 flex items-center justify-center text-[#fdf0d5] shadow-md">
+          <i class="fas fa-indian-rupee-sign text-lg"></i>
+        </div>
+        <h1 class="text-3xl font-semibold text-amber-950">My Vault</h1>
+      </div>
+      <a href="/dashboard" class="group flex items-center gap-2 bg-[#fff8ea] border border-amber-300 px-5 py-2.5 rounded-xl text-amber-900 hover:border-amber-500 hover:text-amber-800 transition-all shadow-sm">
+        <i class="fas fa-arrow-left text-sm group-hover:-translate-x-1 transition"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    <div class="bg-[#fff8ea] rounded-2xl border border-amber-300 shadow-sm card-hover p-7 mb-8 w-full">
+  <!-- main row: balance left, button right -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <!-- left: balance + info -->
+    <div class="flex items-start gap-4">
+      <!-- wallet icon now placed near balance (more compact) -->
+      <div class="h-16 w-16 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 border border-amber-300 flex items-center justify-center text-amber-700 shadow-sm shrink-0">
+        <i class="fas fa-wallet text-2xl"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 text-amber-800 text-sm mb-1">
+          <i class="fas fa-indian-rupee-sign"></i>
+          <span>Available balance (INR)</span>
+        </div>
+        <p class="text-5xl font-light text-amber-950 tracking-tight"> ₹<%= wallet %></p>
+        <p class="text-xs text-amber-700 flex items-center gap-1 mt-2">
+          <i class="fas fa-info-circle"></i> Minimum withdraw ₹110
+        </p>
+      </div>
+    </div>
+
+    <!-- right: button and processing time (stacked vertically on small, row on large) -->
+   <div class="flex flex-col items-start gap-3">
+  <button type="button" id="openWithdrawModal" class="bg-amber-700 hover:bg-amber-800 text-[#fdf0d5] px-8 py-3.5 rounded-xl font-medium shadow-sm hover:shadow-lg transition-all flex items-center gap-3 whitespace-nowrap w-full sm:w-auto justify-center">
+    <i class="fas fa-arrow-up-from-bracket"></i>
+    <span>Withdraw</span>
+  </button>
+  <span class="flex items-center gap-2 text-sm text-amber-800 bg-[#fff8ea] px-4 py-2 rounded-full border border-amber-300 whitespace-nowrap w-full sm:w-auto justify-center">
+    <i class="fas fa-clock"></i> processing within 24h
+  </span>
+</div>
+  </div>
+</div>
+
+    <% if (walletError) { %>
+      <div class="mb-5 text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-5 py-4 flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-red-400"></i> <%= walletError %>
+      </div>
+    <% } %>
+    <% if (walletSuccess) { %>
+      <div class="mb-5 text-sm text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl px-5 py-4 flex items-center gap-3">
+        <i class="fas fa-check-circle text-emerald-400"></i> <%= walletSuccess %>
+      </div>
+    <% } %>
+
+   
+
+    <div class="bg-[#fff8ea] rounded-2xl border border-amber-300 shadow-sm p-6 w-full">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-semibold text-amber-950 flex items-center gap-2">
+          <i class="fas fa-clock-rotate-left text-amber-600"></i> Withdrawal requests
+        </h2>
+        <span class="text-xs bg-amber-100 px-3 py-1 rounded-full text-amber-800">last 10 transactions</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="text-amber-900 border-b border-amber-300 text-xs uppercase tracking-wider">
+            <tr>
+              <th class="text-left pb-3 font-medium">Date & time</th>
+              <th class="text-left pb-3 font-medium">Amount (INR)</th>
+              <th class="text-left pb-3 font-medium">Bank account</th>
+              <th class="text-left pb-3 font-medium">Status</th>
+              <th class="text-left pb-3 font-medium">Reference</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-amber-200">
+            <% if (withdrawals && withdrawals.length) { %>
+              <% withdrawals.forEach(function(item) { %>
+                <tr class="transition">
+                  <td class="py-3.5 text-amber-900"><%= new Date(item.created_at).toLocaleString() %></td>
+                  <td class="py-3.5 font-medium text-amber-950">Rs <%= Number(item.amount).toLocaleString() %></td>
+                  <td class="py-3.5 text-amber-900"><%= item.bank_name %> ..<%= String(item.account_number).slice(-4) %></td>
+                  <td class="py-3.5">
+                    <span class="<%= (item.status || '').toLowerCase() === 'pending' ? 'bg-amber-100 text-amber-700' : (item.status || '').toLowerCase() === 'completed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %> px-2 py-1 rounded-full text-xs font-medium">
+                      <%= item.status %>
+                    </span>
+                  </td>
+                  <td class="py-3.5 text-amber-700 text-xs"><%= item.reference %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="py-5 text-center text-amber-700">No withdrawals yet.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-xs text-amber-700 mt-4 flex items-center gap-2 border-t border-amber-200 pt-4">
+        <i class="fas fa-circle-info text-amber-500"></i> New withdrawal requests appear as "Pending" in the table.
+      </p>
+    </div>
+
+    <div class="mt-6 text-xs text-amber-700 border-t border-amber-300 pt-6 flex flex-wrap items-center gap-4">
+      <span class="flex items-center gap-1.5"><i class="fas fa-lock text-amber-500"></i> 256-bit encrypted</span>
+      <span class="flex items-center gap-1.5"><i class="fas fa-shield-alt text-amber-500"></i> PCI compliant</span>
+      <span class="flex items-center gap-1.5"><i class="fas fa-bank text-amber-500"></i> Indian banks supported</span>
+    </div>
+  </div>
+
+  <div id="withdrawModal" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50 items-center justify-center p-4" aria-hidden="true">
+    <div class="w-full max-w-lg bg-[#fff8ea] rounded-2xl shadow-2xl border border-amber-300 p-8 text-amber-950" role="dialog" aria-modal="true" aria-labelledby="withdrawModalTitle">
+
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700">
+            <i class="fas fa-indian-rupee-sign"></i>
+          </div>
+          <h2 id="withdrawModalTitle" class="text-xl font-semibold text-amber-950">Withdraw to bank (INR)</h2>
+        </div>
+        <button type="button" id="closeWithdrawModal" class="h-8 w-8 rounded-full bg-amber-100 hover:bg-amber-200 flex items-center justify-center text-amber-800 transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="withdrawForm" action="/wallet/withdraw" method="POST" class="space-y-5" autocomplete="off">
+        <input type="text" name="fake_username" class="hidden" tabindex="-1" autocomplete="username" />
+        <input type="password" name="fake_password" class="hidden" tabindex="-1" autocomplete="new-password" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-amber-900 mb-1.5">Amount (Rs) <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <i class="absolute left-4 top-1/2 -translate-y-1/2 text-amber-700 fas fa-indian-rupee-sign"></i>
+              <input id="withdrawAmountInput" type="number" name="amount" min="20" step="1" placeholder="Minimum Rs 20" required autocomplete="off" readonly data-unlock-readonly="1"
+                     class="w-full border border-amber-300 rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/40 bg-[#fdf0d5] text-amber-950 placeholder-amber-700/50" />
+            </div>
+            <p class="text-xs text-amber-700 mt-1">Minimum withdrawal Rs 20</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-amber-900 mb-1.5">Account holder <span class="text-red-500">*</span></label>
+            <input type="text" name="account_holder" placeholder="Full name as per bank" autocomplete="off" readonly data-unlock-readonly="1"
+                   class="w-full border border-amber-300 rounded-xl px-4 py-3.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/40 bg-[#fdf0d5] text-amber-950 placeholder-amber-700/50" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-amber-900 mb-1.5">Bank name <span class="text-red-500">*</span></label>
+            <input type="text" name="bank_name" placeholder="e.g. State Bank of India" autocomplete="off" readonly data-unlock-readonly="1"
+                   class="w-full border border-amber-300 rounded-xl px-4 py-3.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/40 bg-[#fdf0d5] text-amber-950 placeholder-amber-700/50" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-amber-900 mb-1.5">Account number <span class="text-red-500">*</span></label>
+            <input type="text" name="account_number" placeholder="Enter account number" autocomplete="off" readonly data-unlock-readonly="1"
+                   class="w-full border border-amber-300 rounded-xl px-4 py-3.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/40 bg-[#fdf0d5] text-amber-950 placeholder-amber-700/50" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-amber-900 mb-1.5">IFSC code <span class="text-red-500">*</span></label>
+            <input type="text" name="ifsc_code" placeholder="e.g. SBIN0001234" autocomplete="off" readonly data-unlock-readonly="1"
+                   class="w-full border border-amber-300 rounded-xl px-4 py-3.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-300/40 bg-[#fdf0d5] text-amber-950 placeholder-amber-700/50" />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-amber-200 mt-4">
+          <button type="button" id="cancelWithdraw" class="px-5 py-2.5 rounded-lg border border-amber-300 text-amber-900 hover:bg-amber-100 transition font-medium">
+            Cancel
+          </button>
+          <button type="submit" class="px-6 py-2.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-[#fdf0d5] font-medium shadow-sm hover:shadow transition flex items-center gap-2">
+            <i class="fas fa-check"></i> Request withdrawal
+          </button>
+        </div>
+      </form>
+
+      <p class="text-xs text-amber-700 mt-4 flex items-center gap-2 bg-[#fdf0d5] p-3 rounded-lg border border-amber-200">
+        <i class="fas fa-shield-alt text-emerald-500"></i>
+        Funds will be transferred within 24 hours. Status updates in table.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const modal = document.getElementById('withdrawModal');
+      const openBtn = document.getElementById('openWithdrawModal');
+      const closeBtn = document.getElementById('closeWithdrawModal');
+      const cancelBtn = document.getElementById('cancelWithdraw');
+      const amountInput = document.getElementById('withdrawAmountInput');
+      const withdrawForm = document.getElementById('withdrawForm');
+      const shouldResetAfterSuccess = <%= walletSuccess ? 'true' : 'false' %>;
+      const lockInputs = document.querySelectorAll('[data-unlock-readonly="1"]');
+
+      if (!modal || !openBtn || !closeBtn || !cancelBtn) return;
+
+      function resetWithdrawForm() {
+        if (!withdrawForm) return;
+        withdrawForm.reset();
+        const fields = withdrawForm.querySelectorAll('input');
+        fields.forEach((field) => {
+          field.value = '';
+        });
+      }
+
+      function openModal() {
+        resetWithdrawForm();
+        lockInputs.forEach((field) => field.setAttribute('readonly', 'readonly'));
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+          if (amountInput) amountInput.focus();
+        }, 0);
+      }
+
+      function closeModal() {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        resetWithdrawForm();
+      }
+
+      openBtn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+
+      if (shouldResetAfterSuccess) {
+        resetWithdrawForm();
+      }
+
+      window.addEventListener('pageshow', function () {
+        resetWithdrawForm();
+      });
+
+      lockInputs.forEach((field) => {
+        const unlock = function () {
+          field.removeAttribute('readonly');
+        };
+        field.addEventListener('focus', unlock);
+        field.addEventListener('click', unlock);
+      });
+    })();
+  </script>
+</body>
+</html>
+
